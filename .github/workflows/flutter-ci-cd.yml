@@ -3,10 +3,12 @@ name: Flutter CI/CD Android
 on:
   push:
     branches:
-      - feat/release
+      - prod
+      - dev
   pull_request:
     branches:
-      - feat/release
+      - prod
+      - dev
 
 jobs:
   build:
@@ -28,11 +30,17 @@ jobs:
         with:
           flutter-version: "3.24.3"
 
+      - name: Set build name and number
+        run: |
+          echo "BUILD_NAME=${{ secrets.BUILD_NAME_DEV }}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release --build-name=${{ env.BUILD_NAME }} --build-number=${{ env.BUILD_NUMBER }}
 
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
